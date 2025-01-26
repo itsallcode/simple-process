@@ -1,0 +1,137 @@
+
+plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'jacoco-report-aggregation'
+    id 'signing'
+    id 'maven-publish'
+    id 'org.sonarqube' version '6.0.1.5171'
+    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
+    id 'com.github.ben-manes.versions' version '0.52.0'
+}
+
+group = 'org.itsallcode'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    api libs.commons.math3
+
+    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    implementation libs.guava
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter(libs.versions.junitJupiter.get())
+        }
+    }
+}
+
+java {
+    toolchain {
+        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 17
+        languageVersion = JavaLanguageVersion.of(javaVersion)
+    }
+    withJavadocJar()
+    withSourcesJar()
+}
+
+javadoc {
+    failOnError = true
+    options.addStringOption('Xwerror', '-quiet')
+    options.addBooleanOption('linksource', true)
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:all'
+    options.compilerArgs << '-Werror'
+    options.encoding = 'UTF-8'
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+sonar {
+  properties {
+    property("sonar.organization", "itsallcode")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
+}
+
+rootProject.tasks['sonar'].dependsOn(tasks['testCodeCoverageReport'])
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'Simple Process API'
+                description = 'Library to simplify running processes'
+                url = 'https://github.com/itsallcode/simple-process'
+
+                licenses {
+                    license {
+                        name = 'GNU General Public License, Version 3.0'
+                        url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'kaklakariada'
+                        name = 'Christoph'
+                        email = 'kaklakariada@chp1.net'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/itsallcode/simple-process.git'
+                    developerConnection = 'scm:git:https://github.com/itsallcode/simple-process.git'
+                    url = 'https://github.com/itsallcode/simple-process'
+                }
+            }
+        }
+    }
+}
+
+
+signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+}
+
+nexusPublishing {
+    packageGroup = project.group
+    repositories {
+        sonatype {
+            stagingProfileId = "546ea6ce74787e"
+        }
+    }
+}
+
+def isNonStable = { String version ->
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { it -> version.toUpperCase().contains(it) }
+    def regex = /^[0-9,.v-]+(-r)?$/
+    return !stableKeyword && !(version ==~ regex)
+}
+
+tasks.named("dependencyUpdates").configure {
+    gradleReleaseChannel = "current"
+    rejectVersionIf {
+        isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
+    }
+}
