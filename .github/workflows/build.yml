@@ -1,0 +1,61 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  matrix-build:
+    name: Build and test with Java ${{ matrix.java }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        java: ['17', '21', '23']
+    env:
+      DEFAULT_JAVA: '17'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.java }}
+      cancel-in-progress: true
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Cache SonarQube packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-sonar-
+
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ matrix.java }}
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build with Java ${{ matrix.java }}
+      run: ./gradlew build --info -PjavaVersion=${{matrix.java}}
+
+    - name: Sonar analysis
+      if: ${{ env.DEFAULT_JAVA == matrix.java && env.SONAR_TOKEN != null }}
+      run: ./gradlew sonar --info --exclude-task integrationTest -Dsonar.token=$SONAR_TOKEN
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build:
+    name: Build and test with all Java versions
+    needs: matrix-build
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    steps:
+      - run: echo Build successful
