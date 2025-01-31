@@ -3,7 +3,15 @@
  */
 package org.example;
 
+/**
+ * Dummy code
+ */
 public class Library {
+    /**
+     * Dummy method
+     * 
+     * @return value
+     */
     public boolean someLibraryMethod() {
         return true;
     }
