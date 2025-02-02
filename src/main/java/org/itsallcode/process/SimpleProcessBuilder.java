@@ -101,12 +101,12 @@ public class SimpleProcessBuilder {
      * @return a new process
      * @see ProcessBuilder#start()
      */
-    public SimpleProcess start() {
+    public SimpleProcess<String> start() {
         final Process process = startProcess();
-        final ProcessOutputConsumer consumer = new ProcessOutputConsumer(getExecutor(process), process,
-                streamCloseTimeout);
+        final ProcessOutputConsumer<String> consumer = ProcessOutputConsumer.create(getExecutor(process), process,
+                streamCloseTimeout, new StringCollector(), new StringCollector());
         consumer.start();
-        return new SimpleProcess(process, consumer, getCommand());
+        return new SimpleProcess<>(process, consumer, getCommand());
     }
 
     private Process startProcess() {

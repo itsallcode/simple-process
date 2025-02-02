@@ -4,14 +4,14 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-class SimpleProcess {
+class SimpleProcess<T> {
     private static final Logger LOG = Logger.getLogger(SimpleProcess.class.getName());
 
     private final Process process;
     private final String command;
-    private final ProcessOutputConsumer consumer;
+    private final ProcessOutputConsumer<T> consumer;
 
-    SimpleProcess(final Process process, final ProcessOutputConsumer consumer, final String command) {
+    SimpleProcess(final Process process, final ProcessOutputConsumer<T> consumer, final String command) {
         this.process = process;
         this.consumer = consumer;
         this.command = command;
@@ -56,7 +56,7 @@ class SimpleProcess {
 
     public void waitForTermination(final Duration timeout) {
         waitForProcess(timeout);
-        LOG.fine(() -> "Process %d (command '%s') terminated with exit code %d".formatted(process.pid(), command,
+        LOG.finest(() -> "Process %d (command '%s') terminated with exit code %d".formatted(process.pid(), command,
                 exitValue()));
         consumer.waitForStreamsClosed();
     }
@@ -79,11 +79,11 @@ class SimpleProcess {
         }
     }
 
-    String getStdOut() {
+    T getStdOut() {
         return consumer.getStdOut();
     }
 
-    String getStdErr() {
+    T getStdErr() {
         return consumer.getStdErr();
     }
 
