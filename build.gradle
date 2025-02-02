@@ -28,6 +28,11 @@ testing {
                 implementation libs.assertj
                 implementation libs.mockitoJunit
             }
+            targets.all {
+                testTask.configure {
+                    systemProperty 'java.util.logging.config.file', file('src/test/resources/logging.properties')
+                }
+            }
         }
     }
 }
