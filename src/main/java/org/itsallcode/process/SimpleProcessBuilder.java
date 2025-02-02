@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class SimpleProcessBuilder {
     private final ProcessBuilder processBuilder;
     private Duration streamCloseTimeout = Duration.ofSeconds(1);
-    private Executor executor = null;
+    private Executor executor;
 
     SimpleProcessBuilder() {
         this.processBuilder = new ProcessBuilder();
@@ -32,6 +32,7 @@ public class SimpleProcessBuilder {
      * @return {@code this} for fluent programming
      * @see ProcessBuilder#command(String...)
      */
+    @SuppressWarnings("java:S923") // Using varargs by intention
     public SimpleProcessBuilder command(final String... command) {
         this.processBuilder.command(command);
         return this;

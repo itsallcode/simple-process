@@ -1,6 +1,7 @@
 package org.itsallcode.process;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
@@ -17,6 +18,17 @@ class ProcessOutputConsumer<T> {
     private final StreamCollector<T> stdOutCollector;
     private final StreamCollector<T> stdErrCollector;
 
+    ProcessOutputConsumer(final Executor executor, final Process process,
+            final List<Runnable> consumers, final List<StreamCloseWaiter> streamCloseWaiter,
+            final StreamCollector<T> stdOutCollector, final StreamCollector<T> stdErrCollector) {
+        this.executor = executor;
+        this.process = process;
+        this.consumers = Collections.unmodifiableList(consumers);
+        this.streamCloseWaiter = Collections.unmodifiableList(streamCloseWaiter);
+        this.stdOutCollector = stdOutCollector;
+        this.stdErrCollector = stdErrCollector;
+    }
+
     static <T> ProcessOutputConsumer<T> create(final Executor executor, final Process process,
             final Duration streamCloseTimeout, final StreamCollector<T> stdOutCollector,
             final StreamCollector<T> stdErrCollector) {
@@ -29,17 +41,6 @@ class ProcessOutputConsumer<T> {
                 new DelegatingConsumer(List.of(stdErrCloseWaiter, stdErrCollector)));
         return new ProcessOutputConsumer<>(executor, process, List.of(stdOutConsumer, stdErrConsumer),
                 List.of(stdOutCloseWaiter, stdErrCloseWaiter), stdOutCollector, stdErrCollector);
-    }
-
-    ProcessOutputConsumer(final Executor executor, final Process process,
-            final List<Runnable> consumers, final List<StreamCloseWaiter> streamCloseWaiter,
-            final StreamCollector<T> stdOutCollector, final StreamCollector<T> stdErrCollector) {
-        this.executor = executor;
-        this.process = process;
-        this.consumers = consumers;
-        this.streamCloseWaiter = streamCloseWaiter;
-        this.stdOutCollector = stdOutCollector;
-        this.stdErrCollector = stdErrCollector;
     }
 
     void start() {

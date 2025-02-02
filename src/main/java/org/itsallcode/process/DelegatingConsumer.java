@@ -1,6 +1,7 @@
 package org.itsallcode.process;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 class DelegatingConsumer implements ProcessStreamConsumer {
@@ -8,7 +9,7 @@ class DelegatingConsumer implements ProcessStreamConsumer {
     private final List<ProcessStreamConsumer> delegates;
 
     DelegatingConsumer(final List<ProcessStreamConsumer> delegates) {
-        this.delegates = delegates;
+        this.delegates = Collections.unmodifiableList(delegates);
     }
 
     @Override
