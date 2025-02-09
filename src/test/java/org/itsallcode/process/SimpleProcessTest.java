@@ -16,14 +16,14 @@ class SimpleProcessTest {
 
     @Test
     void startingFails() {
-        final SimpleProcessBuilder builder = SimpleProcess.builder().command("no-such-process");
+        final SimpleProcessBuilder builder = builder().command("no-such-process");
         assertThatThrownBy(builder::start).isInstanceOf(UncheckedIOException.class).hasMessage(
                 "Failed to start process [no-such-process] in working dir null: Cannot run program \"no-such-process\": error=2, No such file or directory");
     }
 
     @Test
     void workingDirNull() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("pwd").start();
+        final SimpleProcess<String> process = builder().command("pwd").start();
         process.waitForSuccessfulTermination();
 
         assertThat(process.getStdOut()).isEqualTo("%s%n".formatted(Path.of(".").toAbsolutePath().normalize()));
@@ -31,7 +31,7 @@ class SimpleProcessTest {
 
     @Test
     void workingDirDefined(@TempDir final Path tempDir) {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("pwd").workingDir(tempDir).start();
+        final SimpleProcess<String> process = builder().command("pwd").workingDir(tempDir).start();
         process.waitForSuccessfulTermination();
 
         assertThat(process.getStdOut()).isEqualTo("%s%n".formatted(tempDir));
@@ -39,7 +39,7 @@ class SimpleProcessTest {
 
     @Test
     void processWritesToStdOut() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("echo", "hello world").start();
+        final SimpleProcess<String> process = builder().command("echo", "hello world").start();
         process.waitForSuccessfulTermination();
 
         assertThat(process.getStdOut()).isEqualTo("hello world\n");
@@ -48,7 +48,7 @@ class SimpleProcessTest {
 
     @Test
     void processWritesMultipleLinesToStdOut() {
-        final SimpleProcess<String> process = SimpleProcess.builder()
+        final SimpleProcess<String> process = builder()
                 .command("sh", "-c", "echo 'line 1' && echo 'line 2'")
                 .start();
         process.waitForSuccessfulTermination();
@@ -58,7 +58,7 @@ class SimpleProcessTest {
 
     @Test
     void processWritesToStdOutWithoutTrailingNewline() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("echo", "-n", "hello world").start();
+        final SimpleProcess<String> process = builder().command("echo", "-n", "hello world").start();
         process.waitForSuccessfulTermination();
 
         assertThat(process.getStdOut()).isEqualTo("hello world\n");
@@ -67,7 +67,7 @@ class SimpleProcessTest {
 
     @Test
     void processWritesToStdErr() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("sh", "-c", "echo 'hello world' >&2")
+        final SimpleProcess<String> process = builder().command("sh", "-c", "echo 'hello world' >&2")
                 .start();
         process.waitForTermination(MIN_TIMEOUT);
 
@@ -77,7 +77,7 @@ class SimpleProcessTest {
 
     @Test
     void processWritesToStdOutAndStdErr() {
-        final SimpleProcess<String> process = SimpleProcess.builder().redirectErrorStream(false)
+        final SimpleProcess<String> process = builder().redirectErrorStream(false)
                 .command("sh", "-c",
                         "echo '1: std err' >&2 && echo '2: std out' && echo '3: std err' >&2 && echo '4: std out'")
                 .start();
@@ -89,7 +89,7 @@ class SimpleProcessTest {
 
     @Test
     void redirectErrorStream() {
-        final SimpleProcess<String> process = SimpleProcess.builder().redirectErrorStream(true)
+        final SimpleProcess<String> process = builder().redirectErrorStream(true)
                 .command("sh", "-c",
                         "echo '1: std err' >&2 && echo '2: std out' && echo '3: std err' >&2 && echo '4: std out'")
                 .start();
@@ -101,7 +101,7 @@ class SimpleProcessTest {
 
     @Test
     void processExitNonZero() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("false").start();
+        final SimpleProcess<String> process = builder().command("false").start();
         process.waitForTermination(MIN_TIMEOUT);
 
         assertThat(process.exitValue()).isOne();
@@ -110,7 +110,7 @@ class SimpleProcessTest {
 
     @Test
     void processExitZero() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("true").start();
+        final SimpleProcess<String> process = builder().command("true").start();
         process.waitForTermination(MIN_TIMEOUT);
 
         assertThat(process.exitValue()).isZero();
@@ -119,7 +119,7 @@ class SimpleProcessTest {
 
     @Test
     void waitForTerminationWithTimeout() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("echo", "hello world").start();
+        final SimpleProcess<String> process = builder().command("echo", "hello world").start();
         process.waitForTermination(MIN_TIMEOUT);
 
         assertThat(process.exitValue()).isZero();
@@ -128,7 +128,7 @@ class SimpleProcessTest {
 
     @Test
     void waitForTerminationWithoutTimeout() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("echo", "hello world").start();
+        final SimpleProcess<String> process = builder().command("echo", "hello world").start();
         assertThat(process.waitForTermination()).isZero();
 
         assertThat(process.exitValue()).isZero();
@@ -137,7 +137,7 @@ class SimpleProcessTest {
 
     @Test
     void waitForTerminationDoesNotDestroyProcess() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("sleep", "1").start();
+        final SimpleProcess<String> process = builder().command("sleep", "1").start();
         final Duration timeout = Duration.ofMillis(10);
         assertThatThrownBy(() -> process.waitForTermination(timeout))
                 .isInstanceOf(IllegalStateException.class)
@@ -147,7 +147,7 @@ class SimpleProcessTest {
 
     @Test
     void destroyTerminatesProcess() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("sleep", "1").start();
+        final SimpleProcess<String> process = builder().command("sleep", "1").start();
         assertThat(process.isAlive()).isTrue();
         process.destroy();
         process.waitForTermination(Duration.ofMillis(10));
@@ -157,7 +157,7 @@ class SimpleProcessTest {
 
     @Test
     void destroyTerminatesProcessWaitForTermination() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("sleep", "1").start();
+        final SimpleProcess<String> process = builder().command("sleep", "1").start();
         assertThat(process.isAlive()).isTrue();
         process.destroy();
         assertThat(process.waitForTermination()).isEqualTo(143);
@@ -165,7 +165,7 @@ class SimpleProcessTest {
 
     @Test
     void destroyForcibly() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("sleep", "1").start();
+        final SimpleProcess<String> process = builder().command("sleep", "1").start();
         assertThat(process.isAlive()).isTrue();
         process.destroyForcibly();
         process.waitForTermination(Duration.ofMillis(10));
@@ -175,9 +175,13 @@ class SimpleProcessTest {
 
     @Test
     void destroyForciblyWaitForTermination() {
-        final SimpleProcess<String> process = SimpleProcess.builder().command("sleep", "1").start();
+        final SimpleProcess<String> process = builder().command("sleep", "1").start();
         assertThat(process.isAlive()).isTrue();
         process.destroyForcibly();
         assertThat(process.waitForTermination()).isEqualTo(137);
+    }
+
+    private static SimpleProcessBuilder builder() {
+        return SimpleProcessBuilder.create();
     }
 }

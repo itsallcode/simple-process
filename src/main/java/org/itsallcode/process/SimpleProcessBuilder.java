@@ -14,15 +14,24 @@ import java.util.logging.Logger;
 
 /**
  * Builder for {@link SimpleProcess}. Create a new instance with
- * {@link SimpleProcess#builder()}.
+ * {@link #create()}.
  */
-public class SimpleProcessBuilder {
+public final class SimpleProcessBuilder {
     private final ProcessBuilder processBuilder;
     private Duration streamCloseTimeout = Duration.ofSeconds(1);
     private Executor executor;
 
-    SimpleProcessBuilder() {
+    private SimpleProcessBuilder() {
         this.processBuilder = new ProcessBuilder();
+    }
+
+    /**
+     * Create a new instance.
+     * 
+     * @return new {@link SimpleProcessBuilder}
+     */
+    public static SimpleProcessBuilder create() {
+        return new SimpleProcessBuilder();
     }
 
     /**

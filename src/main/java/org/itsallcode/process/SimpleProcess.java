@@ -4,9 +4,13 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-class SimpleProcess<T> {
+/**
+ * Provides control over native processes.
+ * 
+ * @param <T> type of stdout and stderr, e.g. {@link String}.
+ */
+public class SimpleProcess<T> {
     private static final Logger LOG = Logger.getLogger(SimpleProcess.class.getName());
-
     private final Process process;
     private final String command;
     private final ProcessOutputConsumer<T> consumer;
@@ -17,27 +21,16 @@ class SimpleProcess<T> {
         this.command = command;
     }
 
-    public static SimpleProcessBuilder builder() {
-        return new SimpleProcessBuilder();
-    }
-
+    /**
+     * Wait until the process has terminated.
+     * 
+     * @return exit code
+     * @see Process#waitFor()
+     */
     public int waitForTermination() {
         final int exitCode = waitForProcess();
         consumer.waitForStreamsClosed();
         return exitCode;
-    }
-
-    public void waitForSuccessfulTermination() {
-        waitForTermination(0);
-    }
-
-    public void waitForTermination(final int expectedExitCode) {
-        final int exitCode = waitForTermination();
-        if (exitCode != expectedExitCode) {
-            throw new IllegalStateException(
-                    "Expected process %d (command '%s') to terminate with exit code %d but was %d"
-                            .formatted(process.pid(), command, expectedExitCode, exitCode));
-        }
     }
 
     private int waitForProcess() {
@@ -54,6 +47,41 @@ class SimpleProcess<T> {
         }
     }
 
+    /**
+     * Wait until the process terminates successfully with exit code {@code 0}.
+     * 
+     * @throws IllegalStateException if exit code is not equal to {@code 0}.
+     * @see #waitForTermination()
+     */
+    public void waitForSuccessfulTermination() {
+        waitForTermination(0);
+    }
+
+    /**
+     * Wait until the process terminates successfully with the given exit code.
+     * 
+     * @param expectedExitCode expected exit code
+     * @throws IllegalStateException if exit code is not equal to the given expected
+     *                               exit code.
+     * @see #waitForTermination(int)
+     */
+    public void waitForTermination(final int expectedExitCode) {
+        final int exitCode = waitForTermination();
+        if (exitCode != expectedExitCode) {
+            throw new IllegalStateException(
+                    "Expected process %d (command '%s') to terminate with exit code %d but was %d"
+                            .formatted(process.pid(), command, expectedExitCode, exitCode));
+        }
+    }
+
+    /**
+     * Wait until the process terminates with the given timeout.
+     * 
+     * @param timeout maximum time to wait for the termination
+     * @throws IllegalStateException if process does not exit within the given
+     *                               timeout.
+     * @see Process#waitFor(long, TimeUnit)
+     */
     public void waitForTermination(final Duration timeout) {
         waitForProcess(timeout);
         LOG.finest(() -> "Process %d (command '%s') terminated with exit code %d".formatted(process.pid(), command,
@@ -79,27 +107,59 @@ class SimpleProcess<T> {
         }
     }
 
+    /**
+     * Get the standard output of the process.
+     * 
+     * @return standard output
+     */
     T getStdOut() {
         return consumer.getStdOut();
     }
 
+    /**
+     * Get the standard error of the process.
+     * 
+     * @return standard error
+     */
     T getStdErr() {
         return consumer.getStdErr();
     }
 
+    /**
+     * Check wether the process is alive.
+     * 
+     * @return {@code  true} if the process has not yet terminated
+     * @see Process#isAlive()
+     */
     boolean isAlive() {
         return process.isAlive();
     }
 
+    /**
+     * Get the exit value of the process.
+     * 
+     * @return exit value
+     * @see Process#exitValue()
+     */
     int exitValue() {
         return process.exitValue();
     }
 
+    /**
+     * Kill the process.
+     * 
+     * @See Process#destroy()
+     */
     void destroy() {
         process.destroy();
     }
 
-    void destroyForcibly() {
+    /**
+     * Kill the process forcibly.
+     * 
+     * @see Process#destroyForcibly()
+     */
+    public void destroyForcibly() {
         process.destroyForcibly();
     }
 }
