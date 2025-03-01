@@ -31,7 +31,8 @@ class AsyncStreamConsumer implements Runnable {
             LOG.finest(() -> "Stream '%s' of process %d finished".formatted(name, pid));
             consumer.streamFinished();
         } catch (final IOException exception) {
-            LOG.log(Level.WARNING,
+            final Level logLevel = "Stream closed".equals(exception.getMessage()) ? Level.FINEST : Level.WARNING;
+            LOG.log(logLevel,
                     "Reading stream '%s' of process %d failed: %s".formatted(name, pid,
                             exception.getMessage()),
                     exception);
