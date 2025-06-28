@@ -44,7 +44,8 @@ jobs:
 
       - name: Publish to Maven Central
         if: ${{ !inputs.skip-deploy-maven-central }}
-        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --warning-mode all
+        run: |
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --info --warning-mode all
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.MAVEN_CENTRAL_PORTAL_TOKEN }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.MAVEN_CENTRAL_PORTAL_USERNAME }}
