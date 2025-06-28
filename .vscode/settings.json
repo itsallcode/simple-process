@@ -16,4 +16,8 @@
             "-Djava.util.logging.config.file=src/test/resources/logging.properties"
         ]
     },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "itsallcode",
+        "projectKey": "org.itsallcode:simple-process"
+    }
 }

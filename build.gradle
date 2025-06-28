@@ -5,7 +5,7 @@ plugins {
     id 'jacoco-report-aggregation'
     id 'signing'
     id 'maven-publish'
-    id 'org.sonarqube' version '6.0.1.5171'
+    id 'org.sonarqube' version '6.2.0.5505'
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
     id 'com.github.ben-manes.versions' version '0.52.0'
 }
@@ -18,17 +18,21 @@ repositories {
 }
 
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api libs.commons.math3
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation libs.guava
 }
 
 testing {
     suites {
         test {
             useJUnitJupiter(libs.versions.junitJupiter.get())
+            dependencies {
+                implementation libs.assertj
+                implementation libs.mockitoJunit
+            }
+            targets.all {
+                testTask.configure {
+                    systemProperty 'java.util.logging.config.file', file('src/test/resources/logging.properties')
+                }
+            }
         }
     }
 }
@@ -119,6 +123,8 @@ nexusPublishing {
     repositories {
         sonatype {
             stagingProfileId = "546ea6ce74787e"
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         }
     }
 }

@@ -29,7 +29,7 @@ jobs:
       - name: Build Javadoc
         run: ./gradlew javadoc --info
       - name: Build Reports
-        run: ./gradlew check jacocoTestReport --exclude-task integrationTest --info
+        run: ./gradlew check jacocoTestReport --info
       - name: Collect artifacts
         run: cp -r build/reports/ build/docs/
       - name: Upload artifact

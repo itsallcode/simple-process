@@ -2,11 +2,14 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-commons-math3 = "3.6.1"
-guava = "33.3.1-jre"
 junitJupiter = "5.11.1"
+mockito = "5.18.0"
+assertj = "3.27.3"
+equalsverifier = "3.18.1"
+tostringverifier = "1.4.8"
 
 [libraries]
-commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
-guava = { module = "com.google.guava:guava", version.ref = "guava" }
-
+mockitoJunit = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version.ref = "equalsverifier" }
+tostringverifier = { module = "com.jparams:to-string-verifier", version.ref = "tostringverifier" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
