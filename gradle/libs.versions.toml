@@ -3,7 +3,7 @@
 
 [versions]
 junitJupiter = "5.11.1"
-mockito = "5.15.2"
+mockito = "5.18.0"
 assertj = "3.27.3"
 equalsverifier = "3.18.1"
 tostringverifier = "1.4.8"
