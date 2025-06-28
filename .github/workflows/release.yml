@@ -24,12 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      #- name: Fail if not running on main branch
-      #  if: ${{ github.ref != 'refs/heads/main' }}
-      #  uses: actions/github-script@v7
-      #  with:
-      #    script: |
-      #      core.setFailed('Not running on main branch, github.ref is ${{ github.ref }}. Please start this workflow only on main')
+      - name: Fail if not running on main branch
+        if: ${{ github.ref != 'refs/heads/main' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setFailed('Not running on main branch, github.ref is ${{ github.ref }}. Please start this workflow only on main')
 
       - uses: actions/setup-java@v4
         with:
@@ -45,8 +45,7 @@ jobs:
       - name: Publish to Maven Central
         if: ${{ !inputs.skip-deploy-maven-central }}
         run: |
-          #./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --info --warning-mode all
-          ./gradlew publishToSonatype closeSonatypeStagingRepository --info --warning-mode all
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --info --warning-mode all
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.MAVEN_CENTRAL_PORTAL_TOKEN }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.MAVEN_CENTRAL_PORTAL_USERNAME }}
