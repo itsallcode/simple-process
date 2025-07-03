@@ -36,12 +36,12 @@ public class SimpleProcess<T> {
     private int waitForProcess() {
         try {
             LOG.finest(() -> "Waiting for process %d (command '%s') to terminate...".formatted(
-                    process.pid(), command));
+                    pid(), command));
             return process.waitFor();
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(
-                    "Interrupted while waiting for process %d (command '%s') to finish".formatted(process.pid(),
+                    "Interrupted while waiting for process %d (command '%s') to finish".formatted(pid(),
                             command),
                     exception);
         }
@@ -70,7 +70,7 @@ public class SimpleProcess<T> {
         if (exitCode != expectedExitCode) {
             throw new IllegalStateException(
                     "Expected process %d (command '%s') to terminate with exit code %d but was %d"
-                            .formatted(process.pid(), command, expectedExitCode, exitCode));
+                            .formatted(pid(), command, expectedExitCode, exitCode));
         }
     }
 
@@ -84,7 +84,7 @@ public class SimpleProcess<T> {
      */
     public void waitForTermination(final Duration timeout) {
         waitForProcess(timeout);
-        LOG.finest(() -> "Process %d (command '%s') terminated with exit code %d".formatted(process.pid(), command,
+        LOG.finest(() -> "Process %d (command '%s') terminated with exit code %d".formatted(pid(), command,
                 exitValue()));
         consumer.waitForStreamsClosed();
     }
@@ -92,17 +92,17 @@ public class SimpleProcess<T> {
     private void waitForProcess(final Duration timeout) {
         try {
             LOG.finest(() -> "Waiting %s for process %d (command '%s') to terminate...".formatted(timeout,
-                    process.pid(), command));
+                    pid(), command));
             if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new IllegalStateException(
-                        "Timeout while waiting %s for process %d (command '%s')".formatted(timeout, process.pid(),
+                        "Timeout while waiting %s for process %d (command '%s')".formatted(timeout, pid(),
                                 command));
             }
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(
                     "Interrupted while waiting %s for process %d (command '%s') to finish".formatted(timeout,
-                            process.pid(), command),
+                            pid(), command),
                     exception);
         }
     }
@@ -112,7 +112,7 @@ public class SimpleProcess<T> {
      * 
      * @return standard output
      */
-    T getStdOut() {
+    public T getStdOut() {
         return consumer.getStdOut();
     }
 
@@ -121,7 +121,7 @@ public class SimpleProcess<T> {
      * 
      * @return standard error
      */
-    T getStdErr() {
+    public T getStdErr() {
         return consumer.getStdErr();
     }
 
@@ -131,7 +131,7 @@ public class SimpleProcess<T> {
      * @return {@code  true} if the process has not yet terminated
      * @see Process#isAlive()
      */
-    boolean isAlive() {
+    public boolean isAlive() {
         return process.isAlive();
     }
 
@@ -141,16 +141,26 @@ public class SimpleProcess<T> {
      * @return exit value
      * @see Process#exitValue()
      */
-    int exitValue() {
+    public int exitValue() {
         return process.exitValue();
+    }
+
+    /**
+     * Get the process ID.
+     * 
+     * @return process ID
+     * @see Process#pid()
+     */
+    public long pid() {
+        return process.pid();
     }
 
     /**
      * Kill the process.
      * 
-     * @See Process#destroy()
+     * @see Process#destroy()
      */
-    void destroy() {
+    public void destroy() {
         process.destroy();
     }
 

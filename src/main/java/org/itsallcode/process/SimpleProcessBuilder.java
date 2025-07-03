@@ -20,6 +20,7 @@ public final class SimpleProcessBuilder {
     private final ProcessBuilder processBuilder;
     private Duration streamCloseTimeout = Duration.ofSeconds(1);
     private Executor executor;
+    private Level streamLogLevel = Level.FINE;
 
     private SimpleProcessBuilder() {
         this.processBuilder = new ProcessBuilder();
@@ -60,6 +61,17 @@ public final class SimpleProcessBuilder {
     }
 
     /**
+     * Set working directory to the current process's working directory.
+     * 
+     * @return {@code this} for fluent programming
+     * @see ProcessBuilder#directory(java.io.File)
+     */
+    public SimpleProcessBuilder currentProcessWorkingDir() {
+        this.processBuilder.directory(null);
+        return this;
+    }
+
+    /**
      * Set working directory.
      * 
      * @param workingDir working directory
@@ -96,12 +108,27 @@ public final class SimpleProcessBuilder {
 
     /**
      * Set a custom executor for asynchronous stream readers.
+     * <p>
+     * Default: Create new threads on demand.
      * 
      * @param executor executor
      * @return {@code this} for fluent programming
      */
     public SimpleProcessBuilder streamConsumerExecutor(final Executor executor) {
         this.executor = executor;
+        return this;
+    }
+
+    /**
+     * Log level for the process's stdout and stderr.
+     * <p>
+     * Default: {@link Level#FINE}
+     * 
+     * @param streamLogLevel log level
+     * @return {@code this} for fluent programming
+     */
+    public SimpleProcessBuilder streamLogLevel(Level streamLogLevel) {
+        this.streamLogLevel = streamLogLevel;
         return this;
     }
 
@@ -114,7 +141,7 @@ public final class SimpleProcessBuilder {
     public SimpleProcess<String> start() {
         final Process process = startProcess();
         final ProcessOutputConsumer<String> consumer = ProcessOutputConsumer.create(getExecutor(process), process,
-                streamCloseTimeout, new StringCollector(), new StringCollector());
+                streamCloseTimeout, streamLogLevel, new StringCollector(), new StringCollector());
         consumer.start();
         return new SimpleProcess<>(process, consumer, getCommand());
     }
