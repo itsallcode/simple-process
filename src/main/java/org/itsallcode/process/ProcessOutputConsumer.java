@@ -4,12 +4,15 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Consumes stdout and stderr of a process asynchronously.
  */
-class ProcessOutputConsumer<T> {
+final class ProcessOutputConsumer<T> {
+    private static final String STD_ERR_NAME = "stdErr";
+    private static final String STD_OUT_NAME = "stdOut";
     private static final Logger LOG = Logger.getLogger(ProcessOutputConsumer.class.getName());
     private final Executor executor;
     private final Process process;
@@ -18,7 +21,7 @@ class ProcessOutputConsumer<T> {
     private final StreamCollector<T> stdOutCollector;
     private final StreamCollector<T> stdErrCollector;
 
-    ProcessOutputConsumer(final Executor executor, final Process process,
+    private ProcessOutputConsumer(final Executor executor, final Process process,
             final List<Runnable> consumers, final List<StreamCloseWaiter> streamCloseWaiter,
             final StreamCollector<T> stdOutCollector, final StreamCollector<T> stdErrCollector) {
         this.executor = executor;
@@ -30,15 +33,17 @@ class ProcessOutputConsumer<T> {
     }
 
     static <T> ProcessOutputConsumer<T> create(final Executor executor, final Process process,
-            final Duration streamCloseTimeout, final StreamCollector<T> stdOutCollector,
+            final Duration streamCloseTimeout, Level logLevel, final StreamCollector<T> stdOutCollector,
             final StreamCollector<T> stdErrCollector) {
         final long pid = process.pid();
-        final StreamCloseWaiter stdOutCloseWaiter = new StreamCloseWaiter("stdOut", pid, streamCloseTimeout);
-        final StreamCloseWaiter stdErrCloseWaiter = new StreamCloseWaiter("stdErr", pid, streamCloseTimeout);
-        final AsyncStreamConsumer stdOutConsumer = new AsyncStreamConsumer("stdout", pid, process.getInputStream(),
-                new DelegatingConsumer(List.of(stdOutCloseWaiter, stdOutCollector)));
-        final AsyncStreamConsumer stdErrConsumer = new AsyncStreamConsumer("stderr", pid, process.getErrorStream(),
-                new DelegatingConsumer(List.of(stdErrCloseWaiter, stdErrCollector)));
+        final StreamCloseWaiter stdOutCloseWaiter = new StreamCloseWaiter(STD_OUT_NAME, pid, streamCloseTimeout);
+        final StreamCloseWaiter stdErrCloseWaiter = new StreamCloseWaiter(STD_ERR_NAME, pid, streamCloseTimeout);
+        final AsyncStreamConsumer stdOutConsumer = new AsyncStreamConsumer(STD_OUT_NAME, pid, process.getInputStream(),
+                new DelegatingConsumer(
+                        List.of(stdOutCloseWaiter, stdOutCollector, new StreamLogger(pid, STD_OUT_NAME, logLevel))));
+        final AsyncStreamConsumer stdErrConsumer = new AsyncStreamConsumer(STD_ERR_NAME, pid, process.getErrorStream(),
+                new DelegatingConsumer(
+                        List.of(stdErrCloseWaiter, stdErrCollector, new StreamLogger(pid, STD_ERR_NAME, logLevel))));
         return new ProcessOutputConsumer<>(executor, process, List.of(stdOutConsumer, stdErrConsumer),
                 List.of(stdOutCloseWaiter, stdErrCloseWaiter), stdOutCollector, stdErrCollector);
     }

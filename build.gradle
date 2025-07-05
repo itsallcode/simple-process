@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'org.itsallcode'
-version = '0.1.0'
+version = '0.2.0'
 
 repositories {
     mavenCentral()
@@ -110,8 +110,8 @@ publishing {
     }
 }
 
-
 signing {
+    required = { gradle.taskGraph.hasTask("publish") }
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)

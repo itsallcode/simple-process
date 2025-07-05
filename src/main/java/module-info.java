@@ -8,8 +8,8 @@
  * {@link org.itsallcode.process.SimpleProcessBuilder#start()}.
  */
 
-module simple.process {
+module org.itsallcode.process {
     exports org.itsallcode.process;
 
-    requires java.logging;
+    requires transitive java.logging;
 }
