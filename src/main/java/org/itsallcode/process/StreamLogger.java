@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 class StreamLogger implements ProcessStreamConsumer {
 
-    private static final Logger log = Logger.getLogger(StreamLogger.class.getName());
+    private static final Logger LOG = Logger.getLogger(StreamLogger.class.getName());
     private final Level logLevel;
     private final long pid;
     private final String streamName;
@@ -19,7 +19,7 @@ class StreamLogger implements ProcessStreamConsumer {
 
     @Override
     public void accept(String line) {
-        log.log(logLevel, () -> "%d:%s> %s".formatted(pid, streamName, line));
+        LOG.log(logLevel, () -> "%d:%s> %s".formatted(pid, streamName, line));
     }
 
     @Override
