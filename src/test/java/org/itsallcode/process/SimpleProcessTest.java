@@ -2,10 +2,14 @@ package org.itsallcode.process;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -30,11 +34,41 @@ class SimpleProcessTest {
     }
 
     @Test
+    void currentProcessWorkingDir() {
+        final SimpleProcess<String> process = builder().currentProcessWorkingDir().command("pwd").start();
+        process.waitForSuccessfulTermination();
+
+        assertThat(process.getStdOut()).isEqualTo("%s%n".formatted(Path.of(".").toAbsolutePath().normalize()));
+    }
+
+    @Test
     void workingDirDefined(@TempDir final Path tempDir) {
         final SimpleProcess<String> process = builder().command("pwd").workingDir(tempDir).start();
         process.waitForSuccessfulTermination();
 
         assertThat(process.getStdOut()).isEqualTo("%s%n".formatted(tempDir));
+    }
+
+    @Test
+    void streamConsumerCloseTimeout() {
+        final SimpleProcess<String> process = builder().setStreamCloseTimeout(Duration.ofSeconds(3))
+                .command("echo", "hello world").start();
+        assertDoesNotThrow(process::waitForSuccessfulTermination);
+    }
+
+    @Test
+    void customExecutor() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            final SimpleProcess<String> process = builder().streamConsumerExecutor(executor)
+                    .command("echo", "hello world").start();
+            process.waitForSuccessfulTermination();
+
+            assertThat(process.getStdOut()).isEqualTo("hello world\n");
+            assertThat(process.getStdErr()).isEmpty();
+        } finally {
+            executor.shutdown();
+        }
     }
 
     @Test
@@ -44,6 +78,13 @@ class SimpleProcessTest {
 
         assertThat(process.getStdOut()).isEqualTo("hello world\n");
         assertThat(process.getStdErr()).isEmpty();
+    }
+
+    @Test
+    void customLogLevel() {
+        assertDoesNotThrow(() -> builder().streamLogLevel(Level.INFO)
+                .command("echo", "hello world")
+                .start().waitForTermination());
     }
 
     @Test
@@ -143,6 +184,21 @@ class SimpleProcessTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageStartingWith("Timeout while waiting PT0.01S for process");
         assertThat(process.isAlive()).isTrue();
+    }
+
+    @Test
+    void waitForTerminationWithWrongExpectedExitCode() {
+        final SimpleProcess<String> process = builder().command("echo", "hello").start();
+        assertThatThrownBy(() -> process.waitForTermination(1))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageMatching(
+                        "Expected process \\d+ \\(command 'echo hello'\\) to terminate with exit code 1 but was 0");
+    }
+
+    @Test
+    void waitForTerminationWithCorrectExpectedExitCode() {
+        final SimpleProcess<String> process = builder().command("echo", "hello").start();
+        assertDoesNotThrow(() -> process.waitForTermination(0));
     }
 
     @Test
