@@ -1,5 +1,6 @@
 package org.itsallcode.process;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -11,11 +12,14 @@ import java.util.logging.Logger;
  */
 public class SimpleProcess<T> {
     private static final Logger LOG = Logger.getLogger(SimpleProcess.class.getName());
+    private final Path workingDir;
     private final Process process;
     private final String command;
     private final ProcessOutputConsumer<T> consumer;
 
-    SimpleProcess(final Process process, final ProcessOutputConsumer<T> consumer, final String command) {
+    SimpleProcess(Path workingDir, final Process process, final ProcessOutputConsumer<T> consumer,
+            final String command) {
+        this.workingDir = workingDir;
         this.process = process;
         this.consumer = consumer;
         this.command = command;
@@ -95,8 +99,8 @@ public class SimpleProcess<T> {
                     pid(), command));
             if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new IllegalStateException(
-                        "Timeout while waiting %s for process %d (command '%s')".formatted(timeout, pid(),
-                                command));
+                        "Timeout while waiting %s for process %d (command '%s') in working dir %s".formatted(timeout,
+                                pid(), command, workingDir));
             }
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();

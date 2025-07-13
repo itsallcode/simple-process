@@ -143,7 +143,7 @@ public final class SimpleProcessBuilder {
         final ProcessOutputConsumer<String> consumer = ProcessOutputConsumer.create(getExecutor(process), process,
                 streamCloseTimeout, streamLogLevel, new StringCollector(), new StringCollector());
         consumer.start();
-        return new SimpleProcess<>(process, consumer, getCommand());
+        return new SimpleProcess<>(getWorkingDir(), process, consumer, getCommand());
     }
 
     private Process startProcess() {
@@ -155,6 +155,10 @@ public final class SimpleProcessBuilder {
                             processBuilder.directory(), exception.getMessage()),
                     exception);
         }
+    }
+
+    private Path getWorkingDir() {
+        return processBuilder.directory() != null ? processBuilder.directory().toPath() : null;
     }
 
     private Executor getExecutor(final Process process) {
