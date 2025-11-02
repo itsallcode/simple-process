@@ -21,8 +21,9 @@ class SimpleProcessTest {
     @Test
     void startingFails() {
         final SimpleProcessBuilder builder = builder().command("no-such-process");
-        assertThatThrownBy(builder::start).isInstanceOf(UncheckedIOException.class).hasMessage(
-                "Failed to start process [no-such-process] in working dir null: Cannot run program \"no-such-process\": error=2, No such file or directory");
+        assertThatThrownBy(builder::start).isInstanceOf(UncheckedIOException.class).hasMessageStartingWith(
+                "Failed to start process [no-such-process] in working dir null:")
+                .hasMessageContaining("No such file or directory");
     }
 
     @Test
@@ -58,7 +59,7 @@ class SimpleProcessTest {
 
     @Test
     void customExecutor() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             final SimpleProcess<String> process = builder().streamConsumerExecutor(executor)
                     .command("echo", "hello world").start();

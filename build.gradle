@@ -39,7 +39,7 @@ testing {
 
 java {
     toolchain {
-        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 17
+        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 25
         languageVersion = JavaLanguageVersion.of(javaVersion)
     }
     withJavadocJar()
