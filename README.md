@@ -28,7 +28,7 @@ Add dependency to your Gradle project:
 
 ```groovy
 dependencies {
-    implementation 'org.itsallcode:simple-process:0.1.0'
+    implementation 'org.itsallcode:simple-process:0.3.0'
 }
 ```
 
@@ -38,7 +38,7 @@ Add dependency to your Maven project:
 <dependency>
   <groupId>org.itsallcode</groupId>
   <artifactId>simple-process</artifactId>
-  <version>0.1.0</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
