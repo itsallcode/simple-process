@@ -2,10 +2,10 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-junitJupiter = "5.11.1"
-mockito = "5.18.0"
-assertj = "3.27.3"
-equalsverifier = "3.18.1"
+junitJupiter = "6.0.0"
+mockito = "5.20.0"
+assertj = "3.27.6"
+equalsverifier = "4.2.1"
 tostringverifier = "1.4.8"
 
 [libraries]
