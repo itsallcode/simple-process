@@ -5,9 +5,9 @@ plugins {
     id 'jacoco-report-aggregation'
     id 'signing'
     id 'maven-publish'
-    id 'org.sonarqube' version '6.2.0.5505'
+    id 'org.sonarqube' version '7.0.1.6134'
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
-    id 'com.github.ben-manes.versions' version '0.52.0'
+    id 'com.github.ben-manes.versions' version '0.53.0'
 }
 
 group = 'org.itsallcode'
@@ -39,7 +39,7 @@ testing {
 
 java {
     toolchain {
-        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 17
+        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 25
         languageVersion = JavaLanguageVersion.of(javaVersion)
     }
     withJavadocJar()

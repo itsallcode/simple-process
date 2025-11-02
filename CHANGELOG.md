@@ -6,9 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - unreleased
 
-## [0.2.0] - 2025-07-05
+## [0.2.0] - 2025-11-02
 
 * [PR #3](https://github.com/itsallcode/simple-process/pull/3): Allow configuring log level
+* [PR #9](https://github.com/itsallcode/simple-process/pull/9): Upgrade dependencies
 
 ## [0.1.0] - 2025-06-028
 
