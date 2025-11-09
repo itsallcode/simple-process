@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - unreleased
 
+## [0.3.1] - 2025-11-09
+
+* [PR #12](https://github.com/itsallcode/simple-process/pull/12): Change Java version for release artifacts from Java 25 to Java 17
+
 ## [0.3.0] - 2025-11-02
 
 * [PR #9](https://github.com/itsallcode/simple-process/pull/9): Upgrade dependencies
