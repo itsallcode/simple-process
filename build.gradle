@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'org.itsallcode'
-version = '0.3.0'
+version = '0.3.1'
 
 repositories {
     mavenCentral()
@@ -39,7 +39,7 @@ testing {
 
 java {
     toolchain {
-        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 25
+        def javaVersion = project.hasProperty('javaVersion') ? project.getProperty('javaVersion') : 17
         languageVersion = JavaLanguageVersion.of(javaVersion)
     }
     withJavadocJar()
