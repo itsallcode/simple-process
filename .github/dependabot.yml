@@ -1,6 +1,15 @@
 version: 2
+
+multi-ecosystem-groups:
+  dependencies:
+    schedule:
+      interval: "weekly"
+
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
-    schedule:
-      interval: "monthly"
+    multi-ecosystem-group: "dependencies"
+
+  - package-ecosystem: "gradle"
+    directory: "/"
+    multi-ecosystem-group: "dependencies"
