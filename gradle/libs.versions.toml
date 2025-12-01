@@ -5,7 +5,7 @@
 junitJupiter = "6.0.0"
 mockito = "5.20.0"
 assertj = "3.27.6"
-equalsverifier = "4.2.1"
+equalsverifier = "4.2.4"
 tostringverifier = "1.4.8"
 
 [libraries]
