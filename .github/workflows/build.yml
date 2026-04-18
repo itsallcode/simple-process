@@ -27,7 +27,7 @@ jobs:
         fetch-depth: 0
 
     - name: Cache SonarQube packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar-${{ hashFiles('**/*.gradle') }}
@@ -40,10 +40,13 @@ jobs:
         java-version: ${{ matrix.java }}
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v5
+      uses: gradle/actions/setup-gradle@v6
 
     - name: Build with Java ${{ matrix.java }}
       run: ./gradlew build --info -PjavaVersion=${{matrix.java}}
+      env:
+        OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
+        OSSINDEX_PASSWORD: ${{ secrets.OSSINDEX_TOKEN }}
 
     - name: Sonar analysis
       if: ${{ env.DEFAULT_JAVA == matrix.java && env.SONAR_TOKEN != null }}
